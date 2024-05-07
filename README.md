@@ -133,3 +133,11 @@ mulM :: (Num a) => Matrix r c a -> Matrix c c' a -> Matrix r c' a
 ```
 
 Perceba que o número de linhas da primeira matriz é representado pelo mesmo tipo do número de colunas da primeira matriz `c`. O mesmo vale para matriz resultante.
+
+## Aplicações práticas
+
+### Sistemas lineares
+
+### Processamento de imagens
+<!-- Aplicações de Kernels de diferentes tamanhos e operações de convolução type-safe -->
+<!-- TODO: remove all mentions of multidimensional arrays -->
