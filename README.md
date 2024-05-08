@@ -83,7 +83,7 @@ data Matrix n m a where
 
 Perceba que, assim como no caso da lista, a informação sobre as dimensões da matriz existe apenas no mundo dos tipos. Isso significa que, em tempo de compilação, o compilador pode decidir se uma operação com matrizes é válida ou não.
 
-Diferentemente da implementação da lista, aqui estamos usando o tipo `Nat` definido pelo próprio GHC, as duas representação são equivalentes, com algumas diferenças sutis que não são importantes no momento.
+Diferentemente da implementação da lista, aqui estamos usando o tipo `Nat` definido pelo próprio GHC, as duas representação são equivalentes, com algumas diferenças que não são importantes no momento.
 
 Vamos criar funções para somar, subtrair, escalar e transpor matrizes:
 
@@ -134,9 +134,62 @@ mulM :: (Num a) => Matrix r c a -> Matrix c c' a -> Matrix r c' a
 
 Perceba que o número de linhas da primeira matriz é representado pelo mesmo tipo do número de colunas da primeira matriz `c`. O mesmo vale para matriz resultante.
 
+Agora que já temos as operações básicas de matrizes implementadas (com exceção da determinante e da inversa), podemos partir para a implementação de uma operação de indexação segura, ou seja, uma indexação que, em tempo de compilação, verifica se os valores passados são posições válidas no array.
+
+## Indexação segura
+
+Vamos começar pensando em como a indexação funciona em uma lista. Podemos indexar apenas uma lista que possui pelo menos um elemento, ou seja, cuja dimensão é maior ou igual a um. O mesmo vale para matrizes, mas precisamos pensar em duas dimensões. Além disso, sabemos que se podemos indexar uma lista na posição `n + 1`, podemos também indexar essa mesma lista na posição `n`, ou na posição `n - 1`, ou na posição `n - 2`, ou seja, em qualquer posição menor que `n + 1`. Isso é verdade para qualquer número inteiro `n`.
+
+Se isso te faz lembrar do princípio da indução matemática, você está correto. Podemos usar a indução para criar um tipo que represente qualquer valor indexável para uma lista de tamanho `n`. Vamos explorar isso no seguinte tipo:
+
+```hs
+type Index :: Nat -> Type
+data Index n where
+  IZ :: Index (n + 1)
+  IS :: Index n -> Index (n + 1)
+```
+
+Esse tipo codifica as regras de indexação que falamos no parágrafo anterior. O constritor `IZ` representa o índice do primeiro elemento da lista, enquanto o construtor `IS` representa o índice de um elemento qualquer cuja posição seja menor que `n`. No entanto, logo perceberemos que esse tipo não é nada prático de se usar, pois precisamos criar o índice que queremos encadeando sequências de `IS` até chegar no índice desejado.
+
+Como podemos melhorar esse tipo sem perder a segurança que ele nos dá? Vamos pensar um pouco no nosso problema. Queremos que o valor do índice que desejamos (um valor em tempo de execução) seja menor que o tamanho da lista (um valor em tempo de compilação). Em outras palavras, queremos que um valor seja menor que um outro valor representado por um tipo. Temos uma dependência entre valores em tempo de execução e valores em tempo de compilação!
+
+Como resolvemos esse problema? Em tempo de execução, não conseguimos saber qual o tipo que representa o tamanho da lista, já que ele não existe mais nesse momento, pois todo programa Haskell passa por um processo chamada **type erasure**, onde todos os tipos são removidos do programa. No entanto, podemos usar alguns truques para contornar esse questão.
+
+Vamos considerar que para criar um índice válido, precisamos passar um valor número para uma função `idx`:
+
+```hs
+idx :: Int -> Index n
+idx 0 = IZ
+idx n = IS (idx (n - 1))
+```
+
+<!-- Criação de matrizes a partir de valores numéricos fornecidos pelos usuários -->
+
 ## Aplicações práticas
+
+### Redes
+
+Uma das aplicações mais importantes de matrizes é a representação de redes. Redes são estruturas de dados que representam conexões entre diferentes entidades. Para nosso exemplo, vamos considerar uma rede de computadores, onde cada nó é um computador e cada aresta é uma conexão entre dois computadores. Além disso, cada aresta possui um número entre 0 e 1 associado, que representa a qualidade da conexão entre os dois computadores.
+
+Nessa rede, cada computador é uma função (não necessariamente diferente) que recebe várias entradas e produz uma única saída. Assim, podemos representar essa rede como uma matriz, onde cada linha representa um computador e cada coluna representa uma conexão entre dois computadores. O valor da matriz na posição `(i, j)` é a qualidade da conexão entre o computador `i` e o computador `j`.
+
+Será que conseguimos criar uma estrutura de dados que represente essa rede e que garanta, em tempo de compilação, que todas as operações feitas com essa rede são válidas? Além disso, será que conseguimos nessa mesma estrutura, criar uma forma de acompanhar todas as operações realizadas em cada camada da rede?
 
 ### Sistemas lineares
 
-### Processamento de imagens
-<!-- Aplicações de Kernels de diferentes tamanhos e operações de convolução type-safe -->
+Outra aplicação importante de matrizes é a resolução de sistemas lineares. Um sistema linear é um conjunto de equações lineares que possuem um número finito de variáveis. Podemos representar qualquer sistema linear como uma matriz, onde cada linha representa uma equação e cada coluna representa uma variável. Dessa forma, cada valor `(i, j)` da matriz representa o coeficiente da variável `j` na equação `i`.
+
+Assim como no caso das redes, será que podemos criar uma estrutura com segurança no nível dos tipos que represente um sistema linear e que garanta a viabilidade das operações que realizarmos nele?
+
+## Colocando a mão no código
+
+A resposta para todas essas perguntas é sim e é isso que vamos criar agora. Já temos a base necessária para criar essas estruturas de dados e garantir a segurança no nível dos tipos. Inclusive, podemos representar ambas as estruturas da mesma forma, pois os problemas que descrevemos são equivalentes.
+
+Considere uma rede de 3 camadas, onde a primeira camada possui 2 computadores, a segunda camada possui 3 computadores e a terceira camada possui 1 computador. Além disso, considere que a qualidade da conexão entre os computadores é dada pela seguinte matriz:
+
+<!-- TODO: desenhar essa rede de computadores e entender como ela representa o mesmo problema do sistema linear -->
+
+```hs
+```
+
+<!-- TODO: no final seria bom mostrar que essa representação de redes pode ser útil para outros fins, como calcular TODO: o número de possíveis caminhos entre um nó e outro em tempo de compilação -->
