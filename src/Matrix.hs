@@ -54,3 +54,22 @@ mulM (M xs) ys = M $ map (\row -> map (sum . zipWith (*) row) ys') xs
 
 (#*#) :: (Num a) => Matrix r c a -> Matrix c c' a -> Matrix r c' a
 (#*#) = mulM
+
+type Index :: Nat -> Type
+data Index n where
+  IZ :: Index (n + 1)
+  IS :: Index n -> Index (n + 1)
+
+fromIndex :: forall n. Index n -> Int
+fromIndex IZ = 0
+fromIndex (IS n) = 1 + fromIndex n
+
+(#!!) :: Matrix r c a -> (Index r, Index c) -> a
+(M mx) #!! (n, m) = (mx !! fromIndex n) !! fromIndex m
+
+-- TODO: maybe it is possible to make a index function that takes two integers and
+-- TODO: is type safe still (using Singleton types)
+
+-- TODO: matrix typed by the user
+-- TODO: linear system of equations represented by matrix
+-- TODO: networks represented by matrices

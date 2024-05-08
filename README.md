@@ -1,12 +1,12 @@
-# Operações seguras com matrizes e arrays multidimensionais
+# Operações seguras com matrizes e programação no nível de tipos em Haskell
 
-Matrizes e arrays multidimensionais são estruturas de dados muito utilizadas em computação científica. No entanto, lidar com essas estruturas pode ser complicado, pois sempre temos que ter em mente as dimensões de cada estrutura na hora de realizar operações com elas.
+Matrizes são estruturas de dados muito utilizadas em computação científica. No entanto, lidar com essas estruturas pode ser complicado, pois sempre temos que ter em mente as dimensões de cada estrutura na hora de realizar operações com elas.
 
-Para facilitar a criação de programas que lidam com matrizes a arrays multidimensionais, podemos utilizar as capacidades de programação no nível de tipos da linguagem Haskell. Neste texto, vamos explorar como podemos criar estruturas de dados com garantias no nível dos tipos e como podemos aumentar ainda mais essa segurança para lidar com dimensões fornecidas em tempo de execução.
+Para facilitar a criação de programas que lidam com matrizes, podemos utilizar as capacidades de programação no nível de tipos da linguagem Haskell. Neste texto, vamos explorar como podemos criar estruturas de dados com garantias no nível dos tipos e como podemos aumentar ainda mais essa segurança para lidar com dimensões fornecidas em tempo de execução.
 
 ## Lista indexável
 
-Antes de falarmos propriamente sobre matrizes ou arrays multidimensionais, vamos falar sobre listas indexáveis. Uma lista indexável é uma lista no qual podemos acessar qualquer um de seus elementos através de um número inteiro, que representa a posição do elemento na lista. Em Haskell, já possuímos uma estrutura de dados linear indexável:
+Antes de falarmos propriamente sobre matrizes, vamos falar sobre listas indexáveis. Uma lista indexável é uma lista no qual podemos acessar qualquer um de seus elementos através de um número inteiro, que representa a posição do elemento na lista. Em Haskell, já possuímos uma estrutura de dados linear indexável:
 
 ```hs
 data [a] = [] | a : [a]
@@ -62,7 +62,7 @@ ltail (_ :> xs) = xs
 
 Nessas definições, a própria assinatura da função delimita quais listas podem ser passadas como argumento. As duas funções só aceitam listas com pelos menos um elemento, o que garante, em tempo de compilação, que nunca tentaremos acessar a cabeça ou a cauda de uma lista vazia.
 
-Como essa leve introdução ao mundo da programação no nível de tipos feita, podemos partir para implementação de tipos mais complexos, como matrizes e arrays multidimensionais.
+Como essa leve introdução ao mundo da programação no nível de tipos feita, podemos partir para implementação de tipos mais complexos, como matrizes.
 
 ## Matrizes
 
@@ -140,4 +140,3 @@ Perceba que o número de linhas da primeira matriz é representado pelo mesmo ti
 
 ### Processamento de imagens
 <!-- Aplicações de Kernels de diferentes tamanhos e operações de convolução type-safe -->
-<!-- TODO: remove all mentions of multidimensional arrays -->
