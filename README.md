@@ -306,3 +306,9 @@ Para podermos visualizar a nossa matriz, vamos criar uma instância de `Show` pa
 randomMatrix :: IO (Matrix (S (S (S Z))) (S (S (S (S Z)))) Double)
 
 ```
+
+Agora, podemos usar nossa função `randomMatrix` para criar todas as matrizes de pesos e de ativação da nossa rede neural. Com isso, podemos treinar a nossa rede e utilizá-la para realizar tarefas de aprendizado de máquina.
+
+## Conclusão
+
+Neste texto, vimos como podemos utilizar a programação no nível dos tipos em Haskell para criar estruturas de dados com garantias de segurança e, além disso, aplicações mais complexas com utilidade prática. É possível, além dos exemplos aqui mostrados, criar estruturas de dados ainda mais complexas e garantir que todas as operações feitas com essas estruturas sejam válidas em tempo de compilação. Algumas linguagens levam isso ainda mais ao extremo, como Idris, que permite que os tipos sejam dependentes dos valores, o que aumenta ainda mais a segurança do programa.
