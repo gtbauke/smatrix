@@ -141,7 +141,10 @@ fromIndex (IS n) = 1 + fromIndex n
 
 type Layer :: Nat -> Nat -> Type
 data Layer inputs outputs where
-  L :: Matrix outputs inputs Double -> Matrix (S Z) outputs Double -> Layer inputs outputs
+  L ::
+    Matrix outputs inputs Double ->
+    Matrix (S Z) outputs Double ->
+    Layer inputs outputs
 
 type NeuralNetwork :: Nat -> [Nat] -> Nat -> Type
 data NeuralNetwork inputs hidden outputs where
@@ -151,18 +154,27 @@ data NeuralNetwork inputs hidden outputs where
     NeuralNetwork hidden hidden' outputs ->
     NeuralNetwork inputs (hidden : hidden') outputs
 
-(#>) :: Layer inputs hidden -> NeuralNetwork hidden hidden' outputs -> NeuralNetwork inputs (hidden : hidden') outputs
+(#>) ::
+  Layer inputs hidden ->
+  NeuralNetwork hidden hidden' outputs ->
+  NeuralNetwork inputs (hidden : hidden') outputs
 layer #> network = H layer network
 
 instance Functor (Matrix r c) where
   fmap f (M xs) = M $ map (map f) xs
 
-propagate :: Layer inputs outputs -> Matrix (S Z) inputs Double -> Matrix (S Z) outputs Double
+propagate ::
+  Layer inputs outputs ->
+  Matrix (S Z) inputs Double ->
+  Matrix (S Z) outputs Double
 propagate (L weights biases) inputs = tanh <$> transposeM z
   where
     z = weights #*# transposeM inputs #+# transposeM biases
 
-run :: NeuralNetwork inputs hidden outputs -> Matrix (S Z) inputs Double -> Matrix (S Z) outputs Double
+run ::
+  NeuralNetwork inputs hidden outputs ->
+  Matrix (S Z) inputs Double ->
+  Matrix (S Z) outputs Double
 run (O layer) inputs = tanh <$> propagate layer inputs
 run (H layer network) inputs = run network (propagate layer inputs)
 
@@ -176,7 +188,12 @@ weights (L w _) = w
 biases :: Layer inputs outputs -> Matrix (S Z) outputs Double
 biases (L _ b) = b
 
-train :: NeuralNetworkConfig -> NeuralNetwork inputs hidden outputs -> Matrix (S Z) inputs Double -> Matrix (S Z) outputs Double -> NeuralNetwork inputs hidden outputs
+train ::
+  NeuralNetworkConfig ->
+  NeuralNetwork inputs hidden outputs ->
+  Matrix (S Z) inputs Double ->
+  Matrix (S Z) outputs Double ->
+  NeuralNetwork inputs hidden outputs
 train config (O layer) inputs targets = O layer'
   where
     y = propagate layer inputs
@@ -188,7 +205,10 @@ train config (O layer) inputs targets = O layer'
     weights' = weights layer #-# deltaWeights
     biases' = biases layer #-# deltaBiases
     layer' = L weights' biases'
-train config (H layer network) inputs targets = H layer' (train config network (propagate layer inputs) targets)
+train config (H layer network) inputs targets =
+  H
+    layer'
+    (train config network (propagate layer inputs) targets)
   where
     y = propagate layer inputs
     o = tanh <$> y

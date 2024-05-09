@@ -146,7 +146,10 @@ Agora, vamos considerar como podemos representar nossa rede no nosso programa. C
 ```hs
 type NeuralNetwork :: Nat -> [Nat] -> Nat -> Type
 data NeuralNetwork inputs hidden outputs where
-  Output :: Matrix inputs outputs Double -> ArrayN inputs Double -> NeuralNetwork inputs '[] outputs
+  Output ::
+      Matrix inputs outputs Double ->
+      ArrayN inputs Double ->
+      NeuralNetwork inputs '[] outputs
   Hidden ::
     Matrix inputs hidden Double ->
     ArrayN hidden Double ->
@@ -159,7 +162,10 @@ Para simplificar esse código, vamos criar uma estrutura de dados que armazene o
 ```hs
 type Layer :: Nat -> Nat -> Type
 data Layer inputs outputs where
-  L :: Matrix outputs inputs Double -> ArrayN outputs Double -> Layer inputs outputs
+  L ::
+    Matrix outputs inputs Double ->
+    Matrix (S Z) outputs Double ->
+    Layer inputs outputs
 ```
 
 E para codificar ainda melhor a lógica de sequenciamento das camadas, vamos criar um operador que adiciona uma camada à rede neural:
@@ -173,7 +179,10 @@ data NeuralNetwork inputs hidden outputs where
     NeuralNetwork hidden hidden' outputs ->
     NeuralNetwork inputs (hidden : hidden') outputs
 
-(#>) :: Layer inputs hidden -> NeuralNetwork hidden hidden' outputs -> NeuralNetwork inputs (hidden : hidden') outputs
+(#>) ::
+  Layer inputs hidden ->
+  NeuralNetwork hidden hidden' outputs ->
+  NeuralNetwork inputs (hidden : hidden') outputs
 layer #> network = H layer network
 ```
 
@@ -221,7 +230,10 @@ Vamos implementar a função de propagação de valores:
 instance Functor (Matrix r c) where
   fmap f (M xs) = M $ map (map f) xs
 
-propagate :: Layer inputs outputs -> Matrix (S Z) inputs Double -> Matrix (S Z) outputs Double
+propagate ::
+  Layer inputs outputs ->
+  Matrix (S Z) inputs Double ->
+  Matrix (S Z) outputs Double
 propagate (L weights biases) inputs = tanh <$> transposeM z
   where
     z = weights #*# transposeM inputs #+# transposeM biases
@@ -236,7 +248,10 @@ Para simplificar nossa implementação, invés de usarmos listas `ArrayN` que cr
 Depois que fazemos a propagação de valores na rede neural, precisamos ajustar os pesos das conexões entre os neurônios para que a rede neural realmente aprenda a realizar a tarefa que queremos. Esse processo é chamado de retropropagação e é feito através do algoritmo de gradiente descendente. Como a ideia desse texto é mostrar como podemos garantir a segurança no nível dos tipos, não vou explicar o algoritmo de gradiente descendente:
 
 ```hs
-run :: NeuralNetwork inputs hidden outputs -> Matrix (S Z) inputs Double -> Matrix (S Z) outputs Double
+run ::
+  NeuralNetwork inputs hidden outputs ->
+  Matrix (S Z) inputs Double ->
+  Matrix (S Z) outputs Double
 run (O layer) inputs = tanh <$> propagate layer inputs
 run (H layer network) inputs = run network (propagate layer inputs)
 
@@ -250,7 +265,12 @@ weights (L w _) = w
 biases :: Layer inputs outputs -> Matrix (S Z) outputs Double
 biases (L _ b) = b
 
-train :: NeuralNetworkConfig -> NeuralNetwork inputs hidden outputs -> Matrix (S Z) inputs Double -> Matrix (S Z) outputs Double -> NeuralNetwork inputs hidden outputs
+train ::
+  NeuralNetworkConfig ->
+  NeuralNetwork inputs hidden outputs ->
+  Matrix (S Z) inputs Double ->
+  Matrix (S Z) outputs Double ->
+  NeuralNetwork inputs hidden outputs
 train config (O layer) inputs targets = O layer'
   where
     y = propagate layer inputs
@@ -262,7 +282,10 @@ train config (O layer) inputs targets = O layer'
     weights' = weights layer #-# deltaWeights
     biases' = biases layer #-# deltaBiases
     layer' = L weights' biases'
-train config (H layer network) inputs targets = H layer' (train config network (propagate layer inputs) targets)
+train config (H layer network) inputs targets =
+  H
+    layer'
+    (train config network (propagate layer inputs) targets)
   where
     y = propagate layer inputs
     o = tanh <$> y
